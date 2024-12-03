@@ -1,0 +1,41 @@
+Machine Learning Model Performance Comparison
+==================================================
+
+Model: Linear Regression
+--------------------
+MSE: 43059.9342
+MAE: 175.5617
+R2: 0.8529
+
+Model: KNN Regression
+--------------------
+MSE: 25158.3750
+MAE: 100.4150
+R2: 0.9141
+
+Model: Decision Tree
+--------------------
+MSE: 0.0000
+MAE: 0.0000
+R2: 1.0000
+
+Model: Random Forest
+--------------------
+MSE: 0.0000
+MAE: 0.0000
+R2: 1.0000
+
+Model: XGBoost
+--------------------
+MSE: 0.0003
+MAE: 0.0150
+R2: 1.0000
+
+Model: LightGBM
+--------------------
+MSE: 0.0002
+MAE: 0.0119
+R2: 1.0000
+
+
+Report generated: 2024-11-20 12:37:19.551387
