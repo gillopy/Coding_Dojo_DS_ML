@@ -11,15 +11,14 @@ Ejecutar el archivo .ipynb para visualizar los resultados.
 
 ### Propósito del Proyecto
 
-El propósito de este proyecto es reducir la dimensionalidad mediante el Análisis de Componentes Principales (PCA). Este enfoque permitirá identificar los componentes principales que capturan la mayor parte de la variabilidad en el dataset y analizar su impacto en la simplificación del análisis y modelado de datos.  
+El propósito de este proyecto es utilizar el algoritmo K-means para identificar diferentes grupos de clientes según su comportamiento de compra. El análisis de los clusters resultantes permitirá obtener una mejor comprensión de las características de los clientes, lo que puede ser útil para personalizar estrategias de marketing y mejorar la experiencia del cliente. 
 
 ### Descripción del Dataset  
 
-El dataset utilizado, "Wine Quality", disponible en [Kaggle](https://www.kaggle.com/uciml/red-wine-quality-cortez-et-al-2009), contiene 12 variables químicas (como pH, nivel de acidez y contenido de alcohol) que influyen en la calidad del vino.  
+El dataset utilizado, "Mall Customer Segmentation Data", disponible en [Kaggle](https://www.kaggle.com/vjchoudhary7/customer-segmentation-tutorial-in-python).
 
 ### Técnicas y Procedimientos  
 
-- exploración inicial de las variables.  
-- Normalización de las variables.
-- Implementacion PCA.
-- Analisis del número óptimo de componentes.
+- Asignacion de clusters.
+- Actualizacion de centroides
+- Metodo elbow, silohuete.
