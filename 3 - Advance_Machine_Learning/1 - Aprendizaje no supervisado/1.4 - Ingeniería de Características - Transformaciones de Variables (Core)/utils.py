@@ -338,6 +338,42 @@ def analizar_distribucion_avanzada(serie, nombre_columna, alpha=0.05):
     }
 
 
+def graph_pearson_correlation(pearson, title="Pearson Correlation Heatmap", 
+                              cmap='coolwarm', figsize=(10, 8), annot_size=10):
+    """
+    Genera un gráfico de mapa de calor para la correlación de Pearson.
+
+    Parámetros:
+    - pearson: DataFrame de correlación de Pearson.
+    - title: Título del gráfico.
+    - cmap: Paleta de colores para el mapa de calor.
+    - figsize: Tamaño de la figura.
+    - annot_size: Tamaño de las anotaciones de los valores.
+    """
+    import matplotlib.pyplot as plt
+    import seaborn as sns
+    import numpy as np
+    
+    # Crear máscara para la parte superior del triángulo
+    mask = np.triu(np.ones_like(pearson, dtype=bool))
+    
+    # Crear figura
+    plt.figure(figsize=figsize)
+    
+    # Gráfico de Pearson
+    sns.heatmap(
+        pearson, 
+        annot=True, 
+        cmap=cmap, 
+        center=0, 
+        mask=mask,
+        annot_kws={"size": annot_size},
+        cbar_kws={"shrink": 0.8}
+    )
+    plt.title(title, fontsize=14, pad=10)
+    plt.tight_layout()
+    plt.show()
+
 def graph_correlations(pearson, spearman, kendall, title="Correlation Heatmaps", 
                        cmap=['coolwarm', 'viridis', 'plasma'], 
                        figsize=(20, 16), 
@@ -1114,3 +1150,160 @@ def plot_top_correlations(data,
     # Ajustar diseño y mostrar
     plt.tight_layout()
     plt.show()
+
+def plot_categorical_distributions(data, 
+                                   nrows=None, 
+                                   ncols=None, 
+                                   figsize=None, 
+                                   color="skyblue", 
+                                   edgecolor="black", 
+                                   title="Distribuciones Categóricas del Dataset", 
+                                   top_n=7, 
+                                   alpha=0.8,
+                                   palette="Set2", 
+                                   grid=True):
+    """
+    Genera gráficos de barras para todas las columnas categóricas del dataset, mostrando las N categorías más frecuentes.
+
+    Parámetros:
+    -----------
+    data : DataFrame
+        Dataset que contiene los datos.
+    nrows : int, opcional
+        Número de filas en la cuadrícula de subplots.
+    ncols : int, opcional
+        Número de columnas en la cuadrícula de subplots.
+    figsize : tuple, opcional
+        Tamaño de la figura (ancho, alto).
+    color : str, opcional
+        Color de las barras del gráfico.
+    edgecolor : str, opcional
+        Color del borde de las barras.
+    title : str, opcional
+        Título general del gráfico.
+    top_n : int, opcional
+        Número de categorías más frecuentes a mostrar por columna.
+    alpha : float, opcional
+        Transparencia de las barras (0.0 a 1.0).
+    grid : bool, opcional
+        Si es True, muestra una cuadrícula en los gráficos.
+    """
+    import matplotlib.pyplot as plt
+    import math
+
+    plt.close('all')
+    
+    # Seleccionar columnas categóricas
+    categorical_cols = data.select_dtypes(include=["category", "object"]).columns
+
+    # Calcular dimensiones automáticamente si no se especifican
+    if nrows is None or ncols is None:
+        n_plots = len(categorical_cols)
+        nrows = math.ceil(n_plots / math.ceil(math.sqrt(n_plots)))
+        ncols = math.ceil(math.sqrt(n_plots))
+    
+    # Calcular tamaño de figura si no se especifica
+    if figsize is None:
+        figsize = (4*ncols, 3*nrows)
+
+    # Crear subplots
+    fig, axes = plt.subplots(nrows=nrows, ncols=ncols, figsize=figsize)
+    axes = axes.flatten() if nrows > 1 or ncols > 1 else [axes]
+
+    # Generar gráficos de barras
+    for i, col in enumerate(categorical_cols):
+        if i < len(axes):
+            ax = axes[i]
+            
+            # Contar las categorías más frecuentes
+            top_categories = data[col].value_counts().nlargest(top_n)
+            
+            # Crear gráfico de barras
+            top_categories.plot(kind="bar", color=sns.color_palette(palette, len(top_categories)), 
+                    edgecolor=edgecolor, alpha=alpha, ax=ax)
+            ax.set_title(f"Top {top_n} en '{col}'", fontsize=12, pad=5)
+            ax.set_xlabel("")  # Quitar el título del eje X
+            ax.set_ylabel("Frecuencia")
+            ax.tick_params(axis='x', rotation=45, labelsize=8, colors='black')
+            ax.tick_params(axis='y', labelsize=8, colors='black')
+
+            # Mostrar cuadrícula si está activada
+            if grid:
+                ax.grid(axis="y", linestyle="--", linewidth=0.6, color="gray", alpha=0.5)
+            
+            # Estética de bordes
+            for spine in ['top', 'right', 'left', 'bottom']:
+                ax.spines[spine].set_color("black")
+                ax.spines[spine].set_linewidth(0.5)
+
+    # Eliminar ejes sobrantes
+    for j in range(len(categorical_cols), len(axes)):
+        fig.delaxes(axes[j])
+    
+    # Título general y ajuste
+    fig.suptitle(title, fontsize=16, fontweight="bold", y=1.02)
+    plt.tight_layout()
+    
+    return fig
+
+
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+def plot_correlation_with_variable(data, 
+                                   target_column, 
+                                   correlation_method="pearson", 
+                                   figsize=(6, 10), 
+                                   color_palette="Set2",  # Parámetro para la paleta de colores
+                                   edgecolor="black", 
+                                   grid=True, 
+                                   title="Correlación con la variable objetivo"):
+    """
+    Calcula y genera un gráfico de barras de la correlación de una columna objetivo con las demás variables numéricas del dataset.
+    
+    Parámetros:
+    -----------
+    data : DataFrame
+        El DataFrame que contiene los datos.
+    target_column : str
+        El nombre de la columna objetivo con la que calcular la correlación.
+    correlation_method : str, opcional
+        Método de correlación a utilizar (por defecto 'pearson').
+    figsize : tuple, opcional
+        Tamaño de la figura del gráfico (por defecto (6, 10)).
+    color_palette : str o list, opcional
+        Nombre de la paleta de colores o lista de colores personalizados (por defecto 'Set2').
+    edgecolor : str, opcional
+        Color del borde de las barras (por defecto 'black').
+    grid : bool, opcional
+        Si se debe mostrar la cuadrícula en el gráfico (por defecto True).
+    title : str, opcional
+        Título del gráfico (por defecto 'Correlación con la variable objetivo').
+    """
+    
+    # Filtrar solo las columnas numéricas
+    data_numeric = data.select_dtypes(include=['number'])
+    
+    # Verificar si la columna objetivo está en el dataset
+    if target_column in data_numeric.columns:
+        # Calcular la correlación
+        correlation_with_target = data_numeric.corr(method=correlation_method)[target_column].sort_values(ascending=False)
+        
+        # Crear el gráfico de barras horizontal
+        plt.figure(figsize=figsize)
+        correlation_with_target.drop(target_column).plot(kind="barh", color=sns.color_palette(color_palette), edgecolor=edgecolor)
+        
+        # Personalizar el gráfico
+        plt.title(title, fontsize=16)
+        plt.xlabel("Correlación de Pearson")
+        plt.ylabel("Variables")
+        
+        # Mostrar cuadrícula si es necesario
+        if grid:
+            plt.grid(axis="x", linestyle="--", alpha=0.7)
+        
+        # Ajustar el layout y mostrar el gráfico
+        plt.tight_layout()
+        plt.show()
+    else:
+        print(f"La columna '{target_column}' no está en el dataset.")
